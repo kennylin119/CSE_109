@@ -1,0 +1,10 @@
+Kenny Lin
+CSE 109
+
+3) What is a C pointer and what are its uses/benefits?
+
+Pointers are variables that contain the address, or location in memory, of another variable. Using pointers allows us to 
+access a variable that is defined outside the function. It also helps reduce the length and complexity of a program because 
+it allocates memory dynamically and even helps increase execution speed. This is most important in cases of repetitive operations 
+such as traversing iterable data structures because it is often much "cheaper" to copy and dereference pointers 
+than to copy and access the data that the pointers point to. They are also more efficient in handling data tables. 
