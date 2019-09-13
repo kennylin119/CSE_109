@@ -4,23 +4,27 @@
 #include <string.h>
 
 char parseArgs(int argc, char *argv[]){
-    
-  if (argc > 0){
-      
-  }
-  if (strcmp(*argv,"sop") == 0){ //equals 0 means two strings are equal
-    return '0';
-  } else if (strcmp(*argv,"pos") == 0){
-    return '1';
-  } else if (strcmp(*argv,"-h") == 0){
-      
+  
+  if (argc == 2 ){
+    if (strcmp(argv[1],"sop") == 0){ //equals 0 means two strings are equal
+      return '0';
+    } else if (strcmp(argv[1],"pos") == 0){
+      return '1';
+    } else if (strcmp(argv[1],"-h") == 0){
+      help();
+      exit(0);
+    } else {
+      printf("(1) Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
+      exit(0);
+    }
   } else {
-    //some error happened
-    return '9';
+    printf("(2) Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
+    exit(0);
   }
 
-  size_t unrep = 0;  /* for returning an indicator of overflow/underflow */
-  return unrep;
+  char op = ' ';  /* for returning */
+  return op;
+  
 }
   
 void collectInput(char **name, int *number){
@@ -32,27 +36,24 @@ void collectInput(char **name, int *number){
   //scanf("%s",name);
 
   printf("%s",*name);
-    
-  //int favInt;
   printf("Enter favorite integer (Cntl+D to exit):");
   scanf("%d",number); 
-  //printf("%d",number);
   printf("%s","test");
 }
 
 size_t calcValue(char soemthing, char **name, int number, long *result){
-  char op = ' ';  /* for returning */
-  return op;
+  size_t unrep = 0;  /* for returning an indicator of overflow/underflow */
+  return unrep;
 }
 
 void printResult(char op, long result, size_t unrep){
 }
 
-/* return code and message to print 
-   void bail(int temp, const char *changeLater){
+/* return code and message to print */
+void bail(int temp, const char *changeLater){
 
-   }
-*/
+}
+
 void help(){
   printf("\
 prog0 prompts the user for their first and last name and their favorite integer and\n\
