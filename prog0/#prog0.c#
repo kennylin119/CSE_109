@@ -1,4 +1,4 @@
-#include <stdlib.h>      /* for free */
+int argc#include <stdlib.h>      /* for free */
 #include "prog0_funcs.h"
 
 /* compile with: makefile */
