@@ -39,10 +39,10 @@ void collectInput(char **name, int *number){
 //product of sums
 long pos(char **name, int number){
   //printf("this is the number %d \n", number);
-  long product;
+  long product = 1;
   int len = strlen(*name);
   //printf("this is the length %d \n", len);
-  for (int i = 0; i < len-1; i++){
+  for (int i = 1; i < len; i++){
     int numChar = (int) ((*name)[i]);
     //printf("this is numchar %d \n", numChar);
     int sum = number + numChar;
@@ -56,7 +56,7 @@ long sop(char **name, int number){
   
   long sum = 0; 
   int len = strlen(*name);
-  for (int i = 0; i < len; i++){
+  for (int i = 1; i < len; i++){
     int numChar = (int) ((*name)[i]);
     //printf("this is numchar %d", numChar);
     int product = number * numChar;
