@@ -11,7 +11,6 @@ char parseArgs(int argc, char *argv[]){
       op = '0';
     } else if (strcmp(argv[1],"pos") == 0){
       op = '1';
-      //printf ("i reached pos! %c", op);
     } else if (strcmp(argv[1],"-h") == 0){
       help();
       exit(2);
@@ -34,15 +33,18 @@ void collectInput(char **name, int *number){
 
   printf("%s",*name);
   printf("Enter favorite integer (Cntl+D to exit):");
-  scanf("%d",number); 
+  scanf("%d",number);
 }
 
 //product of sums
 long pos(char **name, int number){
+  //printf("this is the number %d \n", number);
   long product;
   int len = strlen(*name);
-  for (int i = 0; i < len; i++){
+  //printf("this is the length %d \n", len);
+  for (int i = 0; i < len-1; i++){
     int numChar = (int) ((*name)[i]);
+    //printf("this is numchar %d \n", numChar);
     int sum = number + numChar;
     product *= sum;
   }
@@ -51,14 +53,12 @@ long pos(char **name, int number){
 
 //sum of products
 long sop(char **name, int number){
-  //printf("this is name %s", *name);
-  //printf("this is length of name %ld \n", strlen(*name));
-  //printf("this is the first element in name %c \n", (*name)[0]);
   
   long sum = 0; 
   int len = strlen(*name);
   for (int i = 0; i < len; i++){
     int numChar = (int) ((*name)[i]);
+    //printf("this is numchar %d", numChar);
     int product = number * numChar;
     sum += product;
   }
@@ -73,8 +73,8 @@ size_t calcValue(char op, char **name, int number, long *result){
   } else if (op == '1'){
     ans = pos(name, number);
   }
-  // printf("this is the number %ld \n", ans);
-  *result = ans;
+  //printf("this is the ans %ld \n", ans);
+  result = &ans;
   
   size_t unrep = 0;  /* for returning an indicator of overflow/underflow */
   return unrep;
@@ -86,13 +86,15 @@ void printResult(char op, long result, size_t unrep){
     printf("sop \n");
   } else if (op == '1'){
     printf("pos \n");
-  }
+  } else{
+    bail(2, "wrong operation yo");
+ }
   printf("%ld \n", result); 
 }
 
 /* return code and message to print */
-void bail(int temp, const char *changeLater){
-  printf(stderr, "Error(%d): %s", err, message);
+void bail(int err, const char *message){
+  fprintf(stderr, "Error(%d): %s", err, message);
 }
 
 void help(){
