@@ -33,16 +33,16 @@ void collectInput(char **name, int *number){
 
   printf("%s",*name);
   printf("Enter favorite integer (Cntl+D to exit):");
-  scanf("%d",number);
+  number = scanf("%d",number);
 }
 
 //product of sums
 long pos(char **name, int number){
   //printf("this is the number %d \n", number);
   long product = 1;
-  int len = strlen(*name);
+  int len = strlen(*name) -1;
   //printf("this is the length %d \n", len);
-  for (int i = 1; i < len; i++){
+  for (int i = 0; i < len; i++){
     int numChar = (int) ((*name)[i]);
     //printf("this is numchar %d \n", numChar);
     int sum = number + numChar;
@@ -55,8 +55,8 @@ long pos(char **name, int number){
 long sop(char **name, int number){
   
   long sum = 0; 
-  int len = strlen(*name);
-  for (int i = 1; i < len; i++){
+  int len = strlen(*name) - 1;
+  for (int i = 0; i < len; i++){
     int numChar = (int) ((*name)[i]);
     //printf("this is numchar %d", numChar);
     int product = number * numChar;
@@ -74,7 +74,7 @@ size_t calcValue(char op, char **name, int number, long *result){
     ans = pos(name, number);
   }
   //printf("this is the ans %ld \n", ans);
-  result = &ans;
+  *result = ans;
   
   size_t unrep = 0;  /* for returning an indicator of overflow/underflow */
   return unrep;
