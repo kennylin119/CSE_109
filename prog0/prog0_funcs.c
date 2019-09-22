@@ -15,52 +15,87 @@ char parseArgs(int argc, char *argv[]){
       help();
       exit(2);
     } else {
-      printf("(1) Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
-      exit(2);
+      bail(1, "Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
     }
   } else {
-    printf("(2) Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
-    exit(2);
+    bail(2, "Enter a single argument of either 'sop', 'pos', or '-h' (for help)\n\n");
   }
   return op;
 }
-  
+
 void collectInput(char **name, int *number){
   size_t length = 0;
 
   printf("Enter first and last name (Cntl+D to exit):");   
   getline(*&name, &length, stdin);
 
-  printf("%s",*name);
   printf("Enter favorite integer (Cntl+D to exit):");
   number = scanf("%d",number);
 }
 
+void removeSpace(char *text){
+  int len = strlen(text) -1;
+  char newText[len];
+  
+  int spacesRemoved = 0;
+  int temp = 0; 
+  for (int i = 0; i < len; i++){
+    if (text[i] != ' '){
+      newText[temp] =  text[i];
+      temp += 1;
+    } else{
+      spacesRemoved += 1;
+    }
+  }
+  
+  for (int i = 0; i < len - spacesRemoved;i++){
+    text[i] = newText[i];
+  }  
+  text[len-spacesRemoved] = 0;
+}
+
 //product of sums
 long pos(char **name, int number){
-  //printf("this is the number %d \n", number);
+  
+  removeSpace(&**name);
+  
   long product = 1;
-  int len = strlen(*name) -1;
-  //printf("this is the length %d \n", len);
+  int len = strlen(*name);
+  int temp = 0;
+
   for (int i = 0; i < len; i++){
+    
     int numChar = (int) ((*name)[i]);
-    //printf("this is numchar %d \n", numChar);
     int sum = number + numChar;
     product *= sum;
+    
+    if (temp > product){
+      bail(3,"underflow or overflow occurred \n");
+    } else{
+      temp = product;
+    }
+    
   }
   return product;
 }
 
 //sum of products
 long sop(char **name, int number){
+  removeSpace(&**name);
   
-  long sum = 0; 
-  int len = strlen(*name) - 1;
+  long sum = 0;
+  int temp = 0; //for checking overflow
+  
+  int len = strlen(*name);
   for (int i = 0; i < len; i++){
     int numChar = (int) ((*name)[i]);
-    //printf("this is numchar %d", numChar);
     int product = number * numChar;
     sum += product;
+    if (temp > sum){
+      bail(3,"underflow or overflow occurred \n");
+    } else{
+      temp = sum;
+    } 
   }
   return sum;
 }
@@ -73,7 +108,7 @@ size_t calcValue(char op, char **name, int number, long *result){
   } else if (op == '1'){
     ans = pos(name, number);
   }
-  //printf("this is the ans %ld \n", ans);
+  
   *result = ans;
   
   size_t unrep = 0;  /* for returning an indicator of overflow/underflow */
@@ -94,7 +129,8 @@ void printResult(char op, long result, size_t unrep){
 
 /* return code and message to print */
 void bail(int err, const char *message){
-  fprintf(stderr, "Error(%d): %s", err, message);
+  fprintf(stderr, "(%d): %s", err, message);
+  exit(0);
 }
 
 void help(){
