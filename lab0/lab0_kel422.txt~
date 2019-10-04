@@ -1,0 +1,1 @@
+Swap one does not swap the two values of x and y. The swap function creates local copies of x and y as a and b and swaps the values of a and b but this not change the values of the original variables x and y which still have the same original memory address.

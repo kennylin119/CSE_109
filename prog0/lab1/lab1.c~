@@ -1,0 +1,19 @@
+#define PAGE 4096                                                        /* no changes */
+#define KILO 1024                                                        /* no changes */
+
+main(int argc, char *argv[]) {
+  unsigned int i;                                                        /* no changes */
+  char **memptr = Malloc(KILO * KILO * sizeof(char *));                  /* no changes */
+  for (i = 0; i < KILO * KILO; i++) {                                    /* do not add add'l statements to loop body */
+    memptr[i] = Malloc(PAGE);                                            /* no changes */
+    memptr[i][KILO] = 255;                                               /* no changes */
+  }
+}
+
+void *Malloc(int numBytes) {                                             /* no changes */
+  void *ptr = NULL;                                                      /* no changes */
+  if ((ptr = malloc(numBytes)) == NULL) {                                /* no changes */
+    fprintf(stderr, "Could not allocate space - %s", strerror(errno));   /* no changes */
+    exit(99);                                                            /* no changes */
+  }
+}

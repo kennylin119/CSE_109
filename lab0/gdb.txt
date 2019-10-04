@@ -1,0 +1,90 @@
++set logging on
+Already logging to gdb.txt.
++set logging off
++r
+Starting program: /home/kel422/Documents/CSE_109/lab0/swap1 
+
+Breakpoint 2, main () at swap1.c:6
+1: x = 0
+7: y = 0
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++finish
+"finish" not meaningful in the outermost frame.
++next
+1: x = -1
+7: y = 0
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+1: x = -1
+7: y = 1
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+1: x = -1
+7: y = 1
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+
+Breakpoint 3, swap (a=-1, b=1) at swap1.c:15
++jump 14
+Continuing at 0x4005c0.
+
+Breakpoint 3, swap (a=-1, b=1) at swap1.c:15
++next
++next
++next
++next
++next
+main () at swap1.c:10
+1: x = -1
+7: y = 1
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+1: x = -1
+7: y = 1
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+1: x = -1
+7: y = 1
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++next
+0x0000003625a1ed20 in __libc_start_main () from /lib64/libc.so.6
++ru
+Starting program: /home/kel422/Documents/CSE_109/lab0/swap1 
+
+Breakpoint 2, main () at swap1.c:6
+1: x = 0
+7: y = 0
+8: &x = (int *) 0x7fffffffe4cc
+9: &y = (int *) 0x7fffffffe4c8
++displa a
+No symbol "a" in current context.
++jump 14
+Continuing at 0x4005c0.
+
+Breakpoint 3, swap (a=0, b=4195328) at swap1.c:15
++display a
+10: a = 0
++display b 
+11: b = 4195328
++next 
+10: a = 0
+11: b = 4195328
++next 
+10: a = 4195328
+11: b = 4195328
++next
+10: a = 4195328
+11: b = 0
++next
+10: a = 4195328
+11: b = 0
++p a
+$9 = 4195328
++q
