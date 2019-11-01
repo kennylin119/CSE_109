@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [[ -e test.txt ]]; then
+  if [[ -e key.bin ]]; then
+    if [[ -e test.bin ]]; then
+      /bin/rm -f test.bin &> /dev/null
+    fi
+    if [[ -e test.new ]]; then
+      /bin/rm -f test.new &> /dev/null
+    fi
+    echo -e "Contents of test.txt\n"
+    /bin/cat test.txt
+    echo -e "\nRunning prog1 to encrypt test.txt into test.bin"
+    set -x
+    ./prog1 -i test.txt -o test.bin -k key.bin
+    set +x
+    echo -e "\nContents of test.bin\n"
+    /bin/cat test.bin
+    echo -e "\n\nRunning prog1 to decrypt test.bin into test.new (prog0_funcs.c compiled with -DDEBUG)"
+    echo -e "        which is why we see the hex characters printed out\n"
+    set -x
+    ./prog1 -i test.bin -o test.new -k key.bin
+    set +x
+    echo -e "\nContents of test.new\n"
+    /bin/cat test.new
+    echo -e "\nComparing test.txt with test.new\n"
+    /usr/bin/diff -y test.txt test.new
+    echo -e "\n"
+  else
+    echo -e "\nMissing key.bin key file\n"
+    exit
+  fi
+else
+  echo -e "\nMissing test.txt input file\n"
+  exit
+fi
+

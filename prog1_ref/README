@@ -1,0 +1,5 @@
+The prog1_DEBUG file is the executable created by calling "gcc -DDEBUG -c -Wall -Wextra -Write-strings" to create the prog1_funcs.o file before calling gcc to link the .o files together. 
+
+The prog1_NODEBUG file is the executable created by calling "gcc -c -Wall -Wextra -Write-strings" to create the prog1_funcs.o file before calling gcc to link the .o files together.
+
+Actually, I just added (or removed) "-DDEBUG" to my CFLAGS variable in my makefile to define (or not define) the DEBUG macro.
