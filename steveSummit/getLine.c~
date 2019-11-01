@@ -1,0 +1,32 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+int getLine(char stringArray[], int max){
+ 
+  int c; //this is the character input 
+  int i = 0;
+  while ( (c = getchar()) != EOF ){
+ 
+    if (c == '\n'){
+      break;
+    }
+    
+    if ( i < (max - 1)){
+      stringArray[i] = c;
+      i += 1;
+    } 
+
+    if (i == 0 && c == EOF){
+      return EOF; 
+    }
+    
+    stringArray[i] = '\0';
+    return EOF;
+  }
+}
+int main(){
+  char stringArray[20]; 
+  getLine(stringArray, 20);
+  printf("%s", stringArray);
+  return 0;
+}

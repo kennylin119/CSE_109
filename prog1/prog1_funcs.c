@@ -31,107 +31,151 @@ void help(){
   printf("prog1 [-h|--help]\n\n");
 }
 
-void parseArgs(int argc, char *argv[], char **ifile, char **ofile, char **kfile){
-  int opt = 0; //used to check that there is still args in the command line  
-  int counter = 0;
+int containsDash(char *string){
+  return (string[0] == '-');
+}
 
-  while ((opt = getopt(argc, argv, "hi:k:o:")) != -1){
+void parseArgs(int argc, char *argv[], char **ifile, char **ofile, char **kfile){
+    //help message 
+  if (argc == 1){
+    help();
+    exit(0);
+  }
+
+  for (int i = 1; i < argc; i++){
+    if (!strcasecmp(argv[i], "-o") || !strcasecmp(argv[i], "--output")){
+      if (!containsDash(argv[++i]) ){
+	*ofile = (char *) Malloc( strlen(argv[i]) + 1);
+	strcpy(*ofile, argv[i]);
+	 
+      } else{
+	bail(3, "No argument after '-o|--output' ");			     
+      }
+    } else if (!strcasecmp(argv[i], "-i") || !strcasecmp(argv[i], "--input")){
+      if (!containsDash(argv[++i]) ){
+	*ifile = (char *) Malloc(strlen(argv[i] + 1));
+	strcpy(*ifile, argv[i]);
+      } else{
+	bail(4, "No argument after '-i|--input' ");			     
+      }
+    } else if (!strcasecmp(argv[i], "-k") || !strcasecmp(argv[i], "--key") ) {
+      if (!containsDash(argv[++i] ) ) {
+	*kfile = (char *) Malloc(strlen(argv[i] +1));
+	strcpy(*kfile, argv[i]);
+      } else {
+	bail(5, "No argument after '-k|--key' ");			      
+      }
+    } else {
+      bail(1, "incorrect/unexpected argument entered, run without any arguments or with '-h|--help");
+    }
+  }
+  if (*ifile == NULL || *kfile == NULL || *ofile == NULL){
+    bail(2, "One or more arguments not specified");
+  }
+}
+  /*
+    int opt = 0; //used to check that there is still args in the command line  
+    int counter = 0;
+
+    while ((opt = getopt(argc, argv, "hi:k:o:")) != -1){
     size_t len;
     switch(opt){
       
     case 'h':
-      help();
-      exit(0);
-      break;
+    help();
+    exit(0);
+    break;
   
     case 'i':
-      len = sizeof(optarg);
-      *ifile = Malloc(len);
-      for (int i = 0; i < len; i++){
-	ifile[i] = &optarg[i];
-      }
-      counter += 1;
-      break;
+    len = sizeof(optarg);
+    *ifile = Malloc(len);
+    for (int i = 0; i < len; i++){
+    ifile[i] = &optarg[i];
+    }
+    counter += 1;
+    break;
 
     case 'k':
-      len = sizeof(optarg);
-      *ofile = Malloc(len);
-      for (int i = 0; i < len; i++){
-	ifile[i] = &optarg[i];
-      }
-      counter += 1;
-      break;
+    len = sizeof(optarg);
+    *ofile = Malloc(len);
+    for (int i = 0; i < len; i++){
+    ifile[i] = &optarg[i];
+    }
+    counter += 1;
+    break;
 
 
     case 'o':
-      len = strlen(optarg);
-      *ofile = Malloc(len);
-      for (int i = 0; i < len; i++){
-	ifile[i] = &optarg[i];
-      }
-      counter += 1;
-      break;
+    len = strlen(optarg);
+    *ofile = Malloc(len);
+    for (int i = 0; i < len; i++){
+    ifile[i] = &optarg[i];
+    }
+    counter += 1;
+    break;
 
     
     case '?':
-      bail(14, "Incorrect/unexpected argument entered");
-      break;
+    bail(14, "Incorrect/unexpected argument entered");
+    break;
    
-    default: 
-      if (counter > 0 && counter < 3){
-	bail(2, "One or more arguments not specified");
-      } else{
-	bail(1, "Incorrect/unexpected argument entered");
-      }
+    default:
+    bail(1, "Incorrect/unexpected argument entered");
+    break;
+    }
+
+    if (counter < 1){
+    bail(2, "One or more arguments not specified");  
     }
  
-  } //end of while loop
-}
+    } //end of while loop
+  */  
 
-FILE *Fopen(const char *filename, const char *mode){
-  FILE *filep;
-  filep = fopen(filename,mode);
-  if (filep == NULL){
-    bail(10, "Unable to open file *");
-  } 
-  return filep;
-}
-
-size_t Fwrite (const void * block, size_t numItems, size_t BLOCKSIZE, FILE * filename){
-  fwrite(block, numItems, BLOCKSIZE, filename);
-}
-
-void Fclose(FILE *filename){
-  fclose(filename);
-  if (filename != NULL){
-    bail(13, "Unable to close file *");
+  FILE *Fopen(const char *filename, const char *mode){
+    FILE *filep;
+    filep = fopen(filename,mode);
+    if (filep == NULL){
+      bail(10, "Unable to open file *");
+    } 
+    return filep;
   }
-}
 
-size_t Fread(void * block, size_t numItems, size_t BLOCKSIZE, FILE * filename){
-  fread(block, numItems, BLOCKSIZE, filename);
-}
-
-void readKey(unsigned char * key, size_t BLOCKSIZE, FILE * fkp){
-  size_t numItems = Fread(key, 1, BLOCKSIZE, fkp);
-  if (numItems != 0){
-    bail(11, "Error reading file *");    
+  size_t Fwrite (const void * block, size_t numItems, size_t BLOCKSIZE, FILE * filename){
+    fwrite(block, numItems, BLOCKSIZE, filename);
   }
-}
 
-void encryptDecrypt(unsigned char * block, unsigned char * key, size_t BLOCKSIZE, FILE * fip, FILE * fop){
-  size_t numItems;
-  while ( (numItems = Fread(block, sizeof(char) , BLOCKSIZE, fip)) != 0){
-    for (int i = 0; i < numItems; i++) {
-      if (DEBUG) fprintf(stdout, "(%#04X) ^ (%#04X) = ", block[i], key[i]);
-      block[i] = block[i] ^ key[i];
-      if (DEBUG) fprintf(stdout, "(%#04X)\n", block[i]);
+  void Fclose(FILE *filename){
+    fclose(filename);
+    if (filename != NULL){
+      bail(13, "Unable to close file *");
     }
-    Fwrite(block, 1, numItems, fop);
   }
-}
 
-void bail(int rc, const char *msg) {
-  fprintf(stderr, "(%d) %s\n", rc, msg);
-  exit(rc);
-}
+  size_t Fread(void * block, size_t numItems, size_t BLOCKSIZE, FILE * filename){
+    fread(block, numItems, BLOCKSIZE, filename);
+  }
+
+  void readKey(unsigned char * key, size_t BLOCKSIZE, FILE * fkp){
+    size_t numItems = Fread(key, 1, BLOCKSIZE, fkp);
+    if (numItems != 0){
+      bail(11, "Error reading file *");    
+    }
+  }
+
+  void encryptDecrypt(unsigned char * block, unsigned char * key, size_t BLOCKSIZE, FILE * fip, FILE * fop){
+    size_t numItems;
+    while ( (numItems = Fread(block, sizeof(char) , BLOCKSIZE, fip)) != 0){
+      for (int i = 0; i < numItems; i++) {
+	if (DEBUG) fprintf(stdout, "(%#04X) ^ (%#04X) = ", block[i], key[i]);
+	block[i] = block[i] ^ key[i];
+	if (DEBUG) fprintf(stdout, "(%#04X)\n", block[i]);
+      }
+      Fwrite(block, 1, numItems, fop);
+    }
+  }
+
+  void bail(int rc, const char *msg) {
+    fprintf(stderr, "(%d) %s\n", rc, msg);
+    exit(rc);
+  }
+
