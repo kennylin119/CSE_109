@@ -13,8 +13,26 @@
 #include "global_defs.h"
 
 void parseArgs(int argc, char *argv[]){
+  //if there are no args print help()
+  if (argc == 1){
+    help();
+  }
+  for (int i = 1; i < argc; i++){
+    //if not different, return nonzero
+    if ( (!strcasecmp(argv[i], "-h")) || (!strcasecmp(argv[i], "--help")) ) {
+      help();
+    } else if((!strcasecmp(argv[i], "-i")) || (!strcasecmp(argv[i], "--input")) ) {
+      if (++i > argc){
+	//missing input arg
+	bail(3, "No argument after '-i|--input'");
+      }
+    } else{
+      bail(1, "Incorrect/unexpected argument entered");
+    }
+  }
 
 }
+
 
 Node ** createHashTable(Node **currHTptr, size_t numBuckets){
   return 0;
@@ -61,29 +79,37 @@ void freeHashTable(Node ** HTptr){
 
 void *Malloc(size_t len){
   void *ptr;
-  ptr = (char *) malloc(len * sizeof(char) );
-  if (ptr == NULL){
-    bail(99, "Could not allocate space *");
+  char str[128];
+  
+  if (ptr = (char *) malloc(len * sizeof(char)) == NULL){
+    sprintf(str, "Could not allocate space - %s", strerror(errno));
+    bail(99, str);  
   }
   return ptr;
 }
 
 FILE *Fopen (const char *filename, const char *mode){
-  //return file pointer
+  
+  char str[128];
   FILE *filep;
-  filep = fopen(filename,mode);
-  if (filep == NULL){
-    bail(10, "Unable to open file *");
+  
+  if (filep = fopen(filename,mode) == NULL){
+    sprintf(str, "Unable to open %s with mode %s - %s", filename, mode, strerror(errno)); 
+    bail(10, str);
   }
   return filep;
 
 }
 
 void Fclose(FILE *filename){
-  fclose(filename);
-  if (filename != NULL){
-    bail(13, "Unable to close file *");
+  char str[128];
+  
+  //filename != NULL && fclose fails
+  //fclose returns 0 if it fails 
+  if (filename && fclose(filename){
+      sprintf(str, "Unable to close file descriptor %d - s", fileno(fp), strerror(errno) ); 
   }
+    bail(13, str);
 }
 
 void bail(int rCode, const char *msg){
@@ -92,4 +118,11 @@ void bail(int rCode, const char *msg){
 }
 
 void help(){
+  printf("\n");
+  printf("prog2 prog2 creates, retrieves, updates, and deletes key-value pairs in a hash table.\n");
+  printf("The table auto-resizes to maintain “optimum” performance. Run program as follows.\n");
+  printf("prog2 -i|--input <input file>\n");
+  printf("      or\n");
+  printf("prog2 [-h|--help]");
+  exit(0);
 }
