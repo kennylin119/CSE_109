@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <string.h>
 
+size_t totalBuckets;
+
 void parseArgs(int argc, char *argv[]){
   //if there are no args print help()
   if (argc == 1){
@@ -37,25 +39,27 @@ void parseArgs(int argc, char *argv[]){
 }
 
 /*
-typedef struct {
+  typedef struct {
   Node **array; //this defines an array of nodes
-} hT;
+  } hT;
 */
 
-Node** createHashTable(Node **currHTptr, size_t numBuckets){
+Node** createHashTable(Node **currHTptr, size_t initialBuckets){
   Node** hashTable;
-  if (numBuckets < 1){
+
+  if (initialBuckets < 1){
     return NULL;
   }
   if (currHTptr == NULL){
-    //allocates table entries 
-    hashTable = malloc(sizeof(Node*) * numBuckets); 
-  
-    for (uint i = 0; i < numBuckets; i++){
+    //allocates table entries
+    hashTable = (Node**) Malloc(sizeof(Node*) * initialBuckets); 
+    totalBuckets += initialBuckets;
+    for (uint i = 0; i < initialBuckets; i++){
       hashTable[i] = NULL;
     }
   } else{
-    *currHTptr = malloc(sizeof(Node*) * numBuckets);
+    //might need to free currHTptr
+    currHTptr = (Node **) Malloc(sizeof(Node*) * totalBuckets);
     hashTable = currHTptr;
   }
   
@@ -66,24 +70,9 @@ uint32_t hash(uint64_t key){
   uint32_t hash = 5381;
   uint8_t byte;
 
-  //fprintf(stdout, "key = "); print8Bytes(key); fprintf(stdout, " (%lu)\n", key);
-  //fprintf(stdout, "initial hash = "); print4Bytes(hash); fprintf(stdout, " (%u)\n", hash);
   for (uint8_t i = 0; i < 8; i++) {             /* iterate over bytes in the key */
     byte = key & 0xFF;                 /* shift right the key a multiple of 8 bits and AND it with b11111111, to obtain a more significant byte each time */
-    /*switch (i) {
-      case 0 : fprintf(stdout, "first  "); break;
-      case 1 : fprintf(stdout, "second "); break;
-      case 2 : fprintf(stdout, "third  "); break;
-      case 3 : fprintf(stdout, "fourth "); break;
-      case 4 : fprintf(stdout, "fifth  "); break;
-      case 5 : fprintf(stdout, "sixth  "); break;
-      case 6 : fprintf(stdout, "seventh"); break;
-      case 7 : fprintf(stdout, "eighth "); break;
-    }
-    fprintf(stdout, " byte of key = "); print1Byte(byte); fprintf(stdout, "\n");*/
-    
     hash = ((hash << 5) + hash) ^ (uint8_t) byte;         /* multiply hash by 33 and XOR with byte */
-    //fprintf(stdout, "intermediate hash value multiplied by 33 and XOR'd with a byte of the key = "); print4Bytes(hash); fprintf(stdout, "\n");
     key >>= 8;
   }
 
@@ -91,37 +80,72 @@ uint32_t hash(uint64_t key){
 }
 
 void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
-  
+  size_t newSize = sizeCurrHt * (1.0 + (sizeCurrHt * (RESIZEPERCENTAGE / 100.0) ) );
+  createHashTable(currHTptr, newSize);
+  for (int i = 0; i < sizeCurrHt; i++){
+    
+  }
 }
 
 int create(Node **HTptr, uint64_t key, int value){
-  (*HTptr)->key = key;
-  (*HTptr)->value = value;
+  uint32_t index = hash(key) % totalBuckets;
+  //0 for success, 1 for update
   
-  if (HTptr == NULL){
+  Node *currNode = HTptr[index];
+  if (currNode->key == key){
+    update(HTptr, key, value);
     return 1;
-  } else{
-    return 0;
   }
-  //return 0 for success or 1 when update occured
+
+  else if (currNode == NULL){
+    currNode->value = value;
+    currNode->key = key;
+    currNode->next = NULL;
+  }
+
+  else if (currNode != NULL){
+    Node *prevNode = currNode; 
+    Node *newNode; 
+    
+    //this loops until you reach end of linked list
+    while (currNode->next != NULL){
+      prevNode = currNode;
+      if (currNode->key == key){
+	update(HTptr, key, value);
+	return 1;
+      }
+      
+      currNode = currNode->next;
+      
+    }
+    
+    currNode = prevNode;
+    currNode->next = newNode;
+
+    //this is the newly created Node
+    newNode->value = value;
+    newNode->key = key;
+    newNode->next = NULL;
+  }
 }
 
 int update(Node **HTptr, uint64_t key, int value){
-  uint32_t index = hash(key);
-  HTptr[index]->value = value;
-
-  //return 0 for success or 1 when create occured  
-  if ( (HTptr[index])->value == value){
-    return 0;
-  } else {
+  uint32_t index = hash(key) % totalBuckets;
+  if ( (HTptr[index]) == NULL){
+    //create node
+    create(HTptr, key, value);
     return 1;
+  } else {
+    HTptr[index]->value = value;
+    HTptr[index]->key = key;
+    return 0;
   }
-  
+  //return 0 for success or 1 when create occured
 }
 
 int read(Node **HTptr, uint64_t key, int *value){
   uint32_t index = hash(key);
-  if (HTptr[index]->value == '\0'){
+  if ( !strcmp(HTptr[index]->value,'\0')){
     //issue warning
     return 2;
   } else{
@@ -141,6 +165,8 @@ int delete(Node **HTptr, uint64_t key){
 }
 
 Node** runHashCommands(Node **HTptr, FILE *cmdFilePtr){
+  //  Fopen(cmdFilePtr);
+  
   return HTptr;
 }
 
@@ -153,28 +179,17 @@ void printHashTableStats(){
 }
 
 void freeHashTable(Node ** HTptr){
-  if (HTptr == NULL){
-    return;
-  }
-  while (1){
-    if ( (*HTptr)->next == NULL){
-      break;
-    }
-    Node *temp = (*HTptr)->next;
-    free( (*HTptr)->key );
-    free( (*HTptr)->value );
+  for (int i = 0; i < totalBuckets; i++){
+    free(HTptr[i]);
     free( (*HTptr)->next );
-    *HTptr = temp;
   }
-  free(*HTptr);
-  free(HTptr);
 }
 
 void *Malloc(size_t len){
   void *ptr;
   char str[128];
   
-  if ( (ptr = (char *) malloc(len * sizeof(char))) == NULL){
+  if ( (ptr = malloc(len)) == NULL){
     sprintf(str, "Could not allocate space - %s", strerror(errno));
     bail(99, str);  
   }
@@ -200,9 +215,9 @@ void Fclose(FILE *filename){
   //filename != NULL && fclose fails
   //fclose returns 0 if it fails 
   if (filename && fclose(filename) ){
-      sprintf(str, "Unable to close file descriptor %d - %s", fileno(filename), strerror(errno) ); 
+    sprintf(str, "Unable to close file descriptor %d - %s", fileno(filename), strerror(errno) ); 
   }
-    bail(13, str);
+  bail(13, str);
 }
 
 void bail(int rCode, const char *msg){
