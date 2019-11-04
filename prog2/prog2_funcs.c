@@ -95,21 +95,49 @@ void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
 }
 
 int create(Node **HTptr, uint64_t key, int value){
-  //return 0 for success or 1 when update occured  
-  return 0;
+  (*HTptr)->key = key;
+  (*HTptr)->value = value;
+  
+  if (HTptr == NULL){
+    return 1;
+  } else{
+    return 0;
+  }
+  //return 0 for success or 1 when update occured
 }
 
 int update(Node **HTptr, uint64_t key, int value){
+  uint32_t index = hash(key);
+  HTptr[index]->value = value;
+
   //return 0 for success or 1 when create occured  
-  return 0;
+  if ( (HTptr[index])->value == value){
+    return 0;
+  } else {
+    return 1;
+  }
+  
 }
 
 int read(Node **HTptr, uint64_t key, int *value){
-  return 0;
+  uint32_t index = hash(key);
+  if (HTptr[index]->value == '\0'){
+    //issue warning
+    return 2;
+  } else{
+    value = &(HTptr[index]->value);
+    return 0;
+  }
 }
 
 int delete(Node **HTptr, uint64_t key){
-  return 0;
+  uint32_t index = hash(key);
+  HTptr[index]->value = 0;
+  if (HTptr[index]->value == 0){
+    return 0;
+  } else{
+    return 2;
+  }
 }
 
 Node** runHashCommands(Node **HTptr, FILE *cmdFilePtr){
@@ -125,7 +153,21 @@ void printHashTableStats(){
 }
 
 void freeHashTable(Node ** HTptr){
-  
+  if (HTptr == NULL){
+    return;
+  }
+  while (1){
+    if ( (*HTptr)->next == NULL){
+      break;
+    }
+    Node *temp = (*HTptr)->next;
+    free( (*HTptr)->key );
+    free( (*HTptr)->value );
+    free( (*HTptr)->next );
+    *HTptr = temp;
+  }
+  free(*HTptr);
+  free(HTptr);
 }
 
 void *Malloc(size_t len){
@@ -158,7 +200,7 @@ void Fclose(FILE *filename){
   //filename != NULL && fclose fails
   //fclose returns 0 if it fails 
   if (filename && fclose(filename) ){
-      sprintf(str, "Unable to close file descriptor %d - s", fileno(filename), strerror(errno) ); 
+      sprintf(str, "Unable to close file descriptor %d - %s", fileno(filename), strerror(errno) ); 
   }
     bail(13, str);
 }
@@ -174,6 +216,6 @@ void help(){
   printf("The table auto-resizes to maintain “optimum” performance. Run program as follows.\n");
   printf("prog2 -i|--input <input file>\n");
   printf("      or\n");
-  printf("prog2 [-h|--help]");
+  printf("prog2 [-h|--help] \n");
   exit(0);
 }
