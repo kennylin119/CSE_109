@@ -1,3 +1,4 @@
+
 /* 
    Course: CSE109
    Semester and Year: Fall 2019
@@ -69,7 +70,7 @@ int update(Node ** HTptr, uint64_t key, int value){
   return 0;
 }
 
-int read(Node **HTptr, uint64_t something){
+int read(Node **HTptr, uint64_t key, int *value){
   return 0;
 }
 
