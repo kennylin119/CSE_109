@@ -56,7 +56,7 @@ Node ** createHashTable(Node **currHTptr, size_t numBuckets){
   //return pointer to new hash table
 }
 
-void copyHashTable(Node **newHTptr, size_t sizeCurrHT){
+void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
   
 }
 
