@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h> //for unit32_t and uint64_t
-#include "prog2_funcs.h"
 #include "global_defs.h"
+#include "prog2_funcs.h"
 #include <errno.h>
 #include <string.h>
 
