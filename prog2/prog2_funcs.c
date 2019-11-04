@@ -50,10 +50,11 @@ Node ** createHashTable(Node **currHTptr, size_t numBuckets){
   //allocates table entries 
   hashTable->entries = malloc(sizeof(Node) * numBuckets); 
   
-  //create array of nodes, populate all with nulls
+  for (int i = 0; i < numBuckets; i++){
+    hashTable->entries[i] = NULL;
+  }
   
   return hashTable;
-  //return pointer to new hash table
 }
 
 void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
