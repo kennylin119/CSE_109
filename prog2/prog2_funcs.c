@@ -1,3 +1,4 @@
+
 /* 
    Course: CSE109
    Semester and Year: Fall 2019
@@ -9,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h> //for unit32_t and uint64_t
-#include "global_defs.h"
+#include "global_defs.h" 
 #include "prog2_funcs.h"
 #include <errno.h>
 #include <string.h>
@@ -69,7 +70,7 @@ int update(Node ** HTptr, uint64_t key, int value){
   return 0;
 }
 
-int read(Node **HTptr, uint64_t something){
+int read(Node **HTptr, uint64_t key, int *value){
   return 0;
 }
 
