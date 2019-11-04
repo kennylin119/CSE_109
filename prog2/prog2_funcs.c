@@ -36,26 +36,34 @@ void parseArgs(int argc, char *argv[]){
   }
 }
 
+/*
 typedef struct {
-  Node **entries; //this defines an array of nodes
+  Node **array; //this defines an array of nodes
 } hT;
+*/
 
-Node ** createHashTable(Node **currHTptr, size_t numBuckets){
+Node** createHashTable(Node **currHTptr, size_t numBuckets){
+  Node** hashTable;
   if (numBuckets < 1){
     return NULL;
   }
-
-  //allocates table
-  hT *hashTable = malloc(sizeof(hT) * 1); 
-
-  //allocates table entries 
-  hashTable->entries = malloc(sizeof(Node) * numBuckets); 
+  if (currHTptr == NULL){
+    //allocates table entries 
+    hashTable = malloc(sizeof(Node*) * numBuckets); 
   
-  for (int i = 0; i < numBuckets; i++){
-    hashTable->entries[i] = NULL;
+    for (int i = 0; i < numBuckets; i++){
+      hashTable[i] = NULL;
+    }
+  } else{
+    *currHTptr = malloc(sizeof(Node*) * numBuckets);
+    hashTable = currHTptr;
   }
   
   return hashTable;
+}
+
+int32_t hash(uint64_t key){
+  //return 4 byte key
 }
 
 void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
@@ -67,7 +75,7 @@ int create(Node **HTptr, uint64_t key, int value){
   return 0;
 }
 
-int update(Node ** HTptr, uint64_t key, int value){
+int update(Node **HTptr, uint64_t key, int value){
   //return 0 for success or 1 when create occured  
   return 0;
 }
