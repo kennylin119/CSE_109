@@ -51,7 +51,7 @@ Node** createHashTable(Node **currHTptr, size_t numBuckets){
     //allocates table entries 
     hashTable = malloc(sizeof(Node*) * numBuckets); 
   
-    for (uint i = 0; i < numBuckets; i++){
+    for (int i = 0; i < numBuckets; i++){
       hashTable[i] = NULL;
     }
   } else{
@@ -62,7 +62,7 @@ Node** createHashTable(Node **currHTptr, size_t numBuckets){
   return hashTable;
 }
 
-uint32_t hash(uint64_t key){
+int32_t hash(uint64_t key){
   uint32_t hash = 5381;
   uint8_t byte;
 
@@ -79,11 +79,10 @@ uint32_t hash(uint64_t key){
       case 5 : fprintf(stdout, "sixth  "); break;
       case 6 : fprintf(stdout, "seventh"); break;
       case 7 : fprintf(stdout, "eighth "); break;
-    }
-    fprintf(stdout, " byte of key = "); print1Byte(byte); fprintf(stdout, "\n");*/
-    
-    hash = ((hash << 5) + hash) ^ (uint8_t) byte;         /* multiply hash by 33 and XOR with byte */
-    //fprintf(stdout, "intermediate hash value multiplied by 33 and XOR'd with a byte of the key = "); print4Bytes(hash); fprintf(stdout, "\n");
+      }*/
+    //fprintf(stdout, " byte of key = "); print1Byte(byte); fprintf(stdout, "\n");
+    hash = ((hash << 5) + hash) ^ (uint8_t)byte;         /* multiply hash by 33 and XOR with byte */
+    fprintf(stdout, "intermediate hash value multiplied by 33 and XOR'd with a byte of the key = "); print4Bytes(hash); fprintf(stdout, "\n");
     key >>= 8;
   }
 
