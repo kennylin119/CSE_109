@@ -1,4 +1,3 @@
-
 /* 
    Course: CSE109
    Semester and Year: Fall 2019
@@ -17,6 +16,9 @@
 #include <string.h>
 
 size_t totalBuckets;
+size_t percentUsage;
+size_t worstChainLength;
+size_t usedBuckets;
 
 void parseArgs(int argc, char *argv[]){
   //if there are no args print help()
@@ -28,7 +30,7 @@ void parseArgs(int argc, char *argv[]){
     if ( (!strcasecmp(argv[i], "-h")) || (!strcasecmp(argv[i], "--help")) ) {
       help();
     } else if((!strcasecmp(argv[i], "-i")) || (!strcasecmp(argv[i], "--input")) ) {
-      if (++i > argc){
+      if (++i >= argc){
 	//missing input arg
 	bail(3, "No argument after '-i|--input'");
       }
@@ -46,10 +48,12 @@ void parseArgs(int argc, char *argv[]){
 
 Node** createHashTable(Node **currHTptr, size_t initialBuckets){
   Node** hashTable;
+  usedBuckets = initialBuckets * .75;
 
   if (initialBuckets < 1){
     return NULL;
   }
+  
   if (currHTptr == NULL){
     //allocates table entries
     hashTable = (Node**) Malloc(sizeof(Node*) * initialBuckets); 
@@ -80,10 +84,21 @@ uint32_t hash(uint64_t key){
 }
 
 void copyHashTable(Node **newHTptr, Node **currHTptr, size_t sizeCurrHt){
-  size_t newSize = sizeCurrHt * (1.0 + (sizeCurrHt * (RESIZEPERCENTAGE / 100.0) ) );
-  createHashTable(currHTptr, newSize);
-  for (int i = 0; i < sizeCurrHt; i++){
-    
+  totalBuckets = sizeCurrHt * (1.0 + (sizeCurrHt * (RESIZEPERCENTAGE / 100.0) ) );
+  newHTptr = createHashTable(currHTptr, totalBuckets);
+  
+  for (uint i = 0; i < sizeCurrHt; i++){
+    if (currHTptr[i] != NULL){
+      /*size_t newIndex = hash(currHTptr[i]->key) % newSize;
+	newHTptr[newIndex] = currHTptr[i];
+      */
+      
+      create(newHTptr, (currHTptr[i])->key, (currHTptr[i])->value);
+      while ( (currHTptr[i])->next != NULL){
+	Node *nextNode = currHTptr[i]->next;
+	create(newHTptr, nextNode->key, nextNode->value);	  
+      }
+    }
   }
 }
 
@@ -91,42 +106,54 @@ int create(Node **HTptr, uint64_t key, int value){
   uint32_t index = hash(key) % totalBuckets;
   //0 for success, 1 for update
   
-  Node *currNode = HTptr[index];
-  if (currNode->key == key){
-    update(HTptr, key, value);
-    return 1;
+  Node *currNode = (Node*) Malloc(sizeof(Node));
+  
+  //for (int i = 0; i < totalBuckets; i++){    
+  
+  if (currNode != NULL){
+    if(currNode->key == key){
+      update(HTptr, key, value);
+      return 1;
+    }
   }
 
-  else if (currNode == NULL){
+  /*else if (currNode == NULL){
     currNode->value = value;
     currNode->key = key;
     currNode->next = NULL;
-  }
+    return 0;
+    }*/
 
-  else if (currNode != NULL){
-    Node *prevNode = currNode; 
-    Node *newNode; 
-    
-    //this loops until you reach end of linked list
-    while (currNode->next != NULL){
-      prevNode = currNode;
-      if (currNode->key == key){
-	update(HTptr, key, value);
-	return 1;
-      }
+  //else { //(currNode != NULL){
       
-      currNode = currNode->next;
-      
+  currNode->value = value;
+  currNode->key = key;
+  currNode->next = NULL;
+
+  //Node *prevNode = currNode; 
+  //Node *newNode = NULL;
+
+  //this loops until you reach end of linked list
+  while (currNode->next != NULL){
+    //prevNode = currNode;
+    if (currNode->key == key){
+      update(HTptr, key, value);
+      return 1;
     }
-    
-    currNode = prevNode;
-    currNode->next = newNode;
-
-    //this is the newly created Node
-    newNode->value = value;
-    newNode->key = key;
-    newNode->next = NULL;
+    currNode = currNode->next;
   }
+    
+  //currNode = prevNode;
+  //currNode->next = newNode;
+
+  //this is the newly created Node
+  /*newNode->value = value;
+  newNode->key = key;
+  newNode->next = NULL;
+  */
+  
+  HTptr[index] = currNode;
+  return 0;
 }
 
 int update(Node **HTptr, uint64_t key, int value){
@@ -144,9 +171,10 @@ int update(Node **HTptr, uint64_t key, int value){
 }
 
 int read(Node **HTptr, uint64_t key, int *value){
-  uint32_t index = hash(key);
-  if ( !strcmp(HTptr[index]->value,'\0')){
+  uint32_t index = hash(key) % totalBuckets;
+  if ( (HTptr[index])->value == '\0' ){
     //issue warning
+    printf("your index value is null just fyi");
     return 2;
   } else{
     value = &(HTptr[index]->value);
@@ -155,34 +183,79 @@ int read(Node **HTptr, uint64_t key, int *value){
 }
 
 int delete(Node **HTptr, uint64_t key){
-  uint32_t index = hash(key);
+  uint32_t index = hash(key) % totalBuckets;
+
+  //is this part neccessary? 
   HTptr[index]->value = 0;
-  if (HTptr[index]->value == 0){
+  HTptr[index]->key = 0;
+  HTptr[index]->next = NULL;
+
+  if (HTptr[index]->value == 0 && HTptr[index]->key == 0
+      && HTptr[index]->next == NULL){
     return 0;
   } else{
+    //was unsuccessful
     return 2;
   }
 }
 
 Node** runHashCommands(Node **HTptr, FILE *cmdFilePtr){
-  //  Fopen(cmdFilePtr);
+  char *line = NULL;
+  char input[10][10];
+  size_t len = 0;
+  int in = 0;
   
+  char cmd;
+  int value;
+  uint64_t key;
+  
+  while ( (in = (getline(&line, &len, cmdFilePtr)) ) != -1){
+    
+    //iterating variables
+    sscanf(line, "%c %d %lu", &cmd, &value, &key); 
+
+    //c -create r -read u -update d delete
+    if (cmd == 'c'){
+      //int create(Node **HTptr, uint64_t key, int value){
+      create(HTptr, key, value); 
+    }
+
+    else if (cmd == 'r'){
+      //int read(Node **HTptr, uint64_t key, int *value){
+      read(HTptr, key, &value);
+    }
+    
+    else if (cmd == 'u'){
+      //int update(Node **HTptr, uint64_t key, int value){
+      update(HTptr, key, value);
+    }
+
+  }
+    
+  Fclose(cmdFilePtr);
+  getHashTableStats(HTptr);
+  printHashTableStats();
   return HTptr;
 }
 
 void getHashTableStats(Node **HTptr){
-
+  worstChainLength = 5;
+  percentUsage = usedBuckets * 1.0  / totalBuckets; 
 }
 
 void printHashTableStats(){
-  //print global variables 
+  //print global variables
+  fprintf(stdout, "Stats at end: %ld buckets, %ld percent of buckets used, worst chain length = %ld \n", totalBuckets, usedBuckets, worstChainLength);
 }
 
-void freeHashTable(Node ** HTptr){
-  for (int i = 0; i < totalBuckets; i++){
+void freeHashTable(Node **HTptr){
+  for (uint i = 0; i < totalBuckets; i++){
+    if ( (HTptr[i] != NULL) ){
+      free((HTptr[i])->next);
+      }
     free(HTptr[i]);
-    free( (*HTptr)->next );
   }
+  free(HTptr);
 }
 
 void *Malloc(size_t len){
@@ -216,8 +289,8 @@ void Fclose(FILE *filename){
   //fclose returns 0 if it fails 
   if (filename && fclose(filename) ){
     sprintf(str, "Unable to close file descriptor %d - %s", fileno(filename), strerror(errno) ); 
+    bail(13, str);
   }
-  bail(13, str);
 }
 
 void bail(int rCode, const char *msg){
