@@ -1,0 +1,294 @@
+/*
+  Course: CSE109
+  Semester and Year: Fall 2019
+  Assignment: Prog3
+  Author: Lin, Kenny
+  User ID: kel422
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h> //for unit32_t and uint64_t
+//#include "global_defs.h"
+#include "prog3_funcs.h"
+#include <errno.h>
+#include <string.h>
+#include <curl/curl.h>   /* for curl, baby! */
+
+/* if we compile with gcc -DDEBUG, we will set the DEBUG macro to 1 */
+#ifdef DEBUG
+#define DEBUG 1
+#else
+#define DEBUG 0
+#endif
+
+//static int     ftpDownload(char *, char *, char *, char *);
+//static size_t  ftpWrite(void *, size_t, size_t, void *);
+
+struct ftpfile {
+  const char *filename;   /* name to store the file as */
+  FILE *stream;           /* file pointer */
+};
+typedef struct ftpfile ftpFile_t;
+
+
+void parseArgs(int argc, char* argv[], char** ifile, char** ofile,
+	       char** kfile, char **serverName, char** dirName, char** userID, char **pw){
+  //if there are no args print help msg 
+  if (argc == 1){
+    help();
+  }
+
+  for (int i = 1; i < argc; i++){
+    //if not different, return non zero
+
+    if ( (!strcasecmp(argv[i], "-h")) || (!strcasecmp(argv[i], "--help")) ) {
+      help();
+    } else if (!strcasecmp(argv[i], "-i") || !strcasecmp (argv[i], "--input")) {
+      if (++i < argc) {
+        *ifile = (char *)Malloc(strlen(argv[i]) + 1);
+        strcpy(*ifile, argv[i]);
+      } else {
+        bail(3, "No argument after '-i|--input'");
+      }
+    } else if (!strcasecmp(argv[i], "-o") || !strcasecmp (argv[i], "--output")) {
+      if (++i < argc) {
+        *ofile = (char *)Malloc(strlen(argv[i]) + 1);
+        strcpy(*ofile, argv[i]);
+      } else {
+        bail(4, "No argument after '-o|--output'");
+	}
+    } else if (!strcasecmp(argv[i], "-k") || !strcasecmp (argv[i], "--key")) {
+      if (++i < argc) {
+        *kfile = (char *)Malloc(strlen(argv[i]) + 1);
+        strcpy(*kfile, argv[i]);
+      } else {
+        bail(5, "No argument after '-k|--key'");
+      }
+    } else if (!strcasecmp(argv[i], "-s") || !strcasecmp (argv[i], "--server")) {
+      if (++i < argc) {
+        //serverName = (char *)Malloc(strlen(argv[i]) + 1);
+	//strcpy(serverName, argv[i]);
+	*serverName = argv[i];
+      } else {
+        bail(6, "No argument after '-s|--server'");
+      }
+    } else if (!strcasecmp(argv[i], "-d") || !strcasecmp (argv[i], "--directory")) {
+      if (++i < argc) {
+        *dirName = argv[i];
+      } else {
+        bail(7, "No argument after '-d|--directory'");
+      }
+    } else if (!strcasecmp(argv[i], "-u") || !strcasecmp (argv[i], "--userID")) {
+      if (++i < argc) {
+        *userID = argv[i];
+      } else {
+        bail(8, "No argument after '-u|--userID'");
+      }
+    } else if (!strcasecmp(argv[i], "-p") || !strcasecmp (argv[i], "--password")) {
+      if (++i < argc) {
+        *pw = argv[i];
+      } else {
+        bail(9, "No argument after '-p|--password'");
+      }
+    } else {
+      bail(1, "Incorrect/unexpected argument entered, run without any arguments or with '-h|--help' for help");
+    }
+  }
+
+  if (*ifile == NULL || *ofile == NULL || *kfile == NULL || serverName == NULL ||dirName == NULL || userID == NULL || pw == NULL ){
+    bail(2, "One or more arguments not specified");
+  }
+
+} //end parseArgs
+
+void encryptDecrypt(unsigned char *block, unsigned char *key, size_t block_size, FILE *fip, FILE *fop) {
+  size_t items_read;
+  size_t items_written;
+  while (!feof(fip)) {
+    items_written = 0;
+    if ((items_read = Fread(block, sizeof(char), block_size, fip))) {
+      for (size_t i = 0; i < items_read; i++) {
+        if (DEBUG) printf("%#04X ^ %#04X = ", block[i], key[i]);
+        block[i] ^= key[i];
+        if (DEBUG) printf("%#04X\n", block[i]);
+      }
+      items_written = Fwrite(block, sizeof(char), items_read, fop);
+    }
+    if (items_written != items_read)
+      bail(30, "Unable to write all items read");
+  }
+}
+
+//-----------------------------------------------   START OF DOWNLOAD METHODS  -------------------------------------------
+
+int ftpDownload(char *userid, char *password, char *server, char *pathname) {
+  char str[128];                                               /* character string for setting curl settings, call values, o\
+								  r bail messages */
+  CURLcode crc;                                                /* variable to hold CURL function recturn codes */
+  CURL *cp = NULL;                                             /* pointer/handle to curl session/transfer */
+  ftpFile_t FTPfile = { "downloadedFile", NULL };              /* declare and define an ftpFile_t object, you can change fil\
+								  ename or make it a variable */
+
+  curl_global_init(CURL_GLOBAL_ALL);                           /* initializes curl global state; setup and initializes under\
+								  lying libraries */
+
+  cp = curl_easy_init();                                       /* initialize pointer/handle for curl session/transfer */
+
+  if (cp) {                                                    /* check if curl handle creation was successful, and if so, p\
+								  roceed */
+    sprintf(str, "%s:%s", userid, password);
+    curl_easy_setopt(cp, CURLOPT_USERPWD, str);                /* set username and password */
+    sprintf(str, "sftp://%s/%s", server, pathname);
+    curl_easy_setopt(cp, CURLOPT_URL, str);                    /* set protocol, server, directory, and file */
+
+    curl_easy_setopt(cp, CURLOPT_WRITEFUNCTION, ftpWrite);     /* declare our callback to be called when there's data to be \
+								  written */
+
+    curl_easy_setopt(cp, CURLOPT_WRITEDATA, &FTPfile);         /* set a pointer to our struct to pass to the callback */
+
+    curl_easy_setopt(cp, CURLOPT_VERBOSE, 1L);                 /* switch on full protocol/debug output */
+
+    crc = curl_easy_perform(cp);                               /* perform the curl call */
+
+    curl_easy_cleanup(cp);                                     /* cleanup local session/transfer */
+
+  } else {                                                     /* bail in the unlikely event curl handle creation failed */
+    bail(99, "Initialization of curl session/transfer handle was unsuccessful");
+  }
+
+  Fclose(FTPfile.stream);                                      /* close the local file */
+
+  curl_global_cleanup();                                       /* free and clean up associated global resources init call al\
+								  located */
+
+  return (int)crc;                                             /* return curl return code */
+}
+ 
+/* You don't need to change this */
+size_t ftpWrite(void *buffer, size_t size, size_t nmemb, void *stream) {
+  ftpFile_t *oFile = (ftpFile_t *)stream;
+  if(!oFile->stream)
+    oFile->stream = Fopen(oFile->filename, "w");  /* open file for writing */
+  return Fwrite(buffer, size, nmemb, oFile->stream);
+}
+
+
+//-----------------------------------------------   END OF DOWNLOAD METHODS  -----------------------------------------------
+   
+//------------------------------------------------ SOLVING EQUATION FROM FILE ----------------------------------------------
+
+
+void formatOperators (FILE **inputFile, int *num1, int *num2, char** op){
+  //put all file contents into string
+  char* str[256];
+  size_t length;
+  getline(str, &length, *inputFile);
+  //split string by whitespace, put into array
+  sscanf(str, "ld" "%s" "%ld", num1, num2, *op)
+}
+
+/*
+int** takeNumbers (char ** inputArray){
+  //iterate through array, if number then convert string to number and put into new array
+  
+  //else put into other array
+  }*/
+
+int solveEquation(int num1, int num2, char *op){
+  int solution = NULL;
+  if (!strcmp(op, "*")){
+    solution = num1 * num2;
+  } else if (!strcmp(op, "/")){
+    solution = num1 / num2;
+  } else if (!strcmp(op, "-")){
+    solution = num1 - num2;
+  } else if (!strcmp(op, "+")){
+    solution = num1 + num2;
+  }
+  return solution;
+} 
+
+void help(void) {
+  printf("prog3 securely downloads an encrypted calculation file, decrypts the calculation file using a unique key, ");
+  printf("performs the arithmetic operation in the calculation file, generates a results file containing the arithmetic "); 
+  printf("operation and its result, encrypts the results file, and securely uploads the encrypted results file. ");
+  printf("Run program as follows. \n");
+  printf("\n");
+  printf("prog3 -i|--input <calculation file> -o|--output <results file> -k|--key <key file> -s|--server <server_name> ");
+  printf("-d|--directory <directory_on_server> -u|--userid <userID> -p|--password <password> \n");
+  printf("        or\n");
+  printf("prog3 [-h|--help]\n");
+}
+
+void *Malloc(size_t len){
+  void *ptr;
+  char str[128]; //this creates a char array of length 128
+  if ( (ptr = (char *) malloc(len * sizeof(char) ))  == NULL){
+    sprintf(str, "Could not allocate space - %s", strerror(errno));
+    bail(99, str);
+  }
+  return ptr;
+}
+
+void bail(int rc, const char *msg) {
+  fprintf(stderr, "(%d) %s\n", rc, msg);
+  exit(rc);
+}
+
+FILE *Fopen(const char *path, const char *mode) {
+  FILE *fp = NULL;
+  char str[128];
+  if ((fp = fopen(path, mode)) == NULL) {
+    sprintf(str, "Unable to open %s with mode %s - %s", path, mode, strerror(errno));
+    bail(10, str);
+  }
+  return fp;
+}
+
+void Fclose(FILE *fp) {
+  char str[128];
+  if (fp && fclose(fp)) {
+    sprintf(str, "Unable to close file descriptor %d - %s", fileno(fp), strerror(errno));
+    bail(13, str);
+  }
+}
+
+void readKey(unsigned char *key, size_t block_size, FILE *fp) {
+  size_t items_read = 0;
+  char str[128];          /* for error msg */
+  if ((items_read = Fread(key, sizeof(char), block_size, fp)) < block_size) {
+    sprintf(str, "Key is fewer bytes than expected (%zu vs. %zu)", items_read, block_size);
+    bail(20, str);
+  }
+}
+
+size_t Fread(void *ptr, size_t item_size, size_t num_items, FILE *fp) {
+  size_t items_read = 0;
+  char str[128];          /* for error msg */
+
+  /* The function fread() reads num_items of data, each item_size bytes long, from the stream pointed to
+   * by fp, storing them at the location given by ptr. */
+  if ((items_read = fread(ptr, item_size, num_items, fp)) == 0) {  /* getting 0 may not be an error */
+    if (!feof(fp) && ferror(fp)) {   /* this means we did not reach EOF but encountered an error */
+      sprintf(str, "Encountered error while reading from file descriptor %d - %s", fileno(fp), strerror(errno));
+      bail(11, str);
+    }
+  }
+  return items_read;
+}
+
+
+size_t Fwrite(const void *ptr, size_t item_size, size_t num_items, FILE *fp) {
+  size_t items_written = 0;
+  char str[128];
+
+  if ((items_written = fwrite(ptr, item_size, num_items, fp)) == 0) {
+    if (ferror(fp)) {
+      sprintf(str, "Encountered error while writing to file descriptor %d - %s", fileno(fp), strerror(errno));
+      bail(12, str);
+    }
+  }
+  return items_written;
+}
+

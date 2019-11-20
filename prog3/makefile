@@ -1,0 +1,13 @@
+CFLAGS = -g -DDEBUG -c -Wall -Wextra -Wwrite-strings
+CFLAGS = -g -c -Wall -Wextra -Wwrite-strings
+LFLAGS = -g
+LDFLAGS += -lcurl
+prog2: prog3_funcs.o prog3.o
+	gcc ${LFLAGS} -o prog3 prog3_funcs.o prog3.o ${LDFLAGS}
+prog2.o: prog3_funcs.h prog3.c
+	gcc ${CFLAGS} prog3.c
+prog2_funcs.o: prog3_funcs.h prog3_funcs.c
+	gcc ${CFLAGS} prog3_funcs.c 
+clean:
+	rm -f *.o
+	rm -f prog3
