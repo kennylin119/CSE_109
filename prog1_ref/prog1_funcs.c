@@ -13,7 +13,7 @@
 void parseArgs(int argc, char *argv[], char **ifile, char **ofile, char **kfile) {
   if (argc == 1) help();
   for (int i = 1; i < argc; i++) {
-    if        (!strcasecmp(argv[i], "-h") || !strcasecmp (argv[i], "--help")) {
+    if (!strcasecmp(argv[i], "-h") || !strcasecmp (argv[i], "--help")) {
       help();
     } else if (!strcasecmp(argv[i], "-i") || !strcasecmp (argv[i], "--input")) {
       if (++i < argc) {

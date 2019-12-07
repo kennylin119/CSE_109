@@ -128,7 +128,7 @@ int ftpDownload(char *userid, char *password, char *server, char *pathname, char
 								  r bail messages */
   CURLcode crc;                                                /* variable to hold CURL function recturn codes */
   CURL *cp = NULL;                                             /* pointer/handle to curl session/transfer */
-  ftpFile_t FTPfile = { filename, NULL };              /* declare and define an ftpFile_t object, you can change fil\
+  ftpFile_t FTPfile = { "downloadedFile", NULL };              /* declare and define an ftpFile_t object, you can change fil\
 								  ename or make it a variable */
 
   curl_global_init(CURL_GLOBAL_ALL);                           /* initializes curl global state; setup and initializes under\
@@ -158,7 +158,7 @@ int ftpDownload(char *userid, char *password, char *server, char *pathname, char
     bail(99, "Initialization of curl session/transfer handle was unsuccessful");
   }
 
-  //Fclose(FTPfile.stream);                                      /* close the local file */
+  Fclose(FTPfile.stream);                                      /* close the local file */
 
   curl_global_cleanup();                                       /* free and clean up associated global resources init call al\
 								  located */
@@ -172,9 +172,9 @@ int ftpUpload(FILE *uploadFile, char *userid, char *password, char* server, char
   CURLcode crc;
   CURL *cp = NULL;
   
-  //ftpFile_t FTPfile = {"EncryptedFile", Fopen(filename, "rb")};              /* declare and define an ftpFile_t object, you can change fil */
+  ftpFile_t FTPfile = {filename, NULL};              /* declare and define an ftpFile_t object, you can change fil */
   
-  //ftpFile_t FTPfile = {filename, uploadFile};
+  ftpFile_t FTPfile = {filename, uploadFile};
 
   curl_global_init(CURL_GLOBAL_ALL);
   
@@ -189,11 +189,11 @@ int ftpUpload(FILE *uploadFile, char *userid, char *password, char* server, char
 
     sprintf(str, "sftp://%s/%s/%s", server, pathname, filename);
     
-    curl_easy_setopt(cp, CURLOPT_READFUNCTION, &ftpRead);
-    
-    curl_easy_setopt(cp, CURLOPT_UPLOAD, 1L); //upload to the url
+    curl_easy_setopt(cp, CURLOPT_READFUNCTION, ftpRead);
     
     curl_easy_setopt(cp, CURLOPT_URL, str);                    /* set protocol, server, directory, and file */
+    
+    curl_easy_setopt(cp, CURLOPT_UPLOAD, 1L); //upload to the url
     
     curl_easy_setopt(cp, CURLOPT_READDATA, uploadFile); //read data from uploadFile
     
@@ -204,15 +204,10 @@ int ftpUpload(FILE *uploadFile, char *userid, char *password, char* server, char
     crc = curl_easy_perform(cp); //perform curl call
     
     curl_easy_cleanup(cp); //cleanup local session/transfer
-    
-    
-    
+
   } else{
     bail(99, "Initialization of curl session/transfer handle was unsuccessful");
   }
-  //Fclose(*filename);
-  //Fclose(FTPfile.stream);
-  
   curl_global_cleanup();
 
   return (int) crc;
@@ -228,7 +223,6 @@ size_t ftpRead(void *buffer, size_t size, size_t nmemb, void *stream){
  
   fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
           " bytes from file\n", nread);
-  //Fclose(stream);
   return retcode;
 }
 

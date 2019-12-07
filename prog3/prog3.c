@@ -9,9 +9,9 @@
 
 int main(int argc, char *argv[]) {
   char *ifile = NULL;               /* to point to input file name */
-  FILE *fip = NULL;                 /* to point to opened input file */
+  //FILE *fip = NULL;                 /* to point to opened input file */
   char *ofile = NULL;               /* to point to output file name */
-  FILE *fop = NULL;                 /* to point to opened output file */
+  //FILE *fop = NULL;                 /* to point to opened output file */
   char *kfile = NULL;               /* to point to key file name */
   FILE *fkp = NULL;                 /* to point to opened key file */
   
@@ -25,21 +25,20 @@ int main(int argc, char *argv[]) {
 
   parseArgs(argc, argv, &ifile, &ofile, &kfile, &serverName, &dirName, &userID, &pw);    /* parse arguments and return pointers to filenames */
 
-  //fip = Fopen(ifile, "r");
-  //fop = Fopen(ofile, "w");
-  //fkp = Fopen(kfile, "r");
-  
-  FILE *fEncryptedFile = Fopen("downloadedFile", "r"); //this is downloadedFile
-  FILE *fDecryptedFile = Fopen("DecryptedFile", "w"); //this can be anything - maybe output?
-  FILE *fDecryptedAnswer = Fopen("DecryptedAnswer", "w");
-  FILE *fEncryptedAnswer = Fopen("EncryptedAnswer", "w");
   fkp = Fopen(kfile, "r");
+  
+  FILE *fEncryptedFile = Fopen("downloadedFile", "r+"); //this is downloadedFile
+  FILE *fDecryptedFile = Fopen("DecryptedFile", "w+"); //this can be anything - maybe output?
+  FILE *fDecryptedAnswer = Fopen("DecryptedAnswer", "w+");
+  FILE *fEncryptedAnswer = Fopen("EncryptedAnswer", "w+");
+  //fkp = Fopen(kfile, "r");
 
   //ftpDownload - directory and input file as pathname 
   char str[256];
   int rc =0;
+  char *filename = ifile;
 
-  rc = ftpDownload(userID, pw, serverName, dirName);
+  rc = ftpDownload(userID, pw, serverName, dirName, filename);
   
   if (rc) {                                                  /* bail if transfer was unsuccessful */
     sprintf(str, "Unable to download %s from %s (curl rc = %d (%s))", dirName, serverName, rc, curl_easy_strerror(rc));
@@ -48,23 +47,43 @@ int main(int argc, char *argv[]) {
 
 //decrypt - use key for decryption
 
-readKey(key, BLOCKSIZE, fkp);                     /* read the key for encryption/decryption */
-encryptDecrypt(block, key, BLOCKSIZE, fEncryptedFile, fDecryptedFile);
+  readKey(key, BLOCKSIZE, fkp);                     /* read the key for encryption/decryption */
+  encryptDecrypt(block, key, BLOCKSIZE, fEncryptedFile, fDecryptedFile);
+  rewind(fDecryptedFile);
 
 //solve equaiton, write into file
 //should prob pass in a file pointer and use getline +sscanf or fscanf
- readByWhiteSpace(fDecryptedFile);
-  
-//encrypt - use key for encryption
-  
-//ftpUpload - use directory and output file as pathname
-  
-  
-//encryptDecrypt(block, key, BLOCKSIZE, fip, fop);  /* encrypt/decrypt the input file and write to output file */
+ long num1;
+ long num2;
+ char op[1];
+ 
+ long solution;
+ extractValues(fDecryptedFile, &num1, &num2, op);
+ solution = solveEquation(num1, num2, op);
+ 
+ fprintf(fDecryptedAnswer, "%ld", solution);
+ rewind(fDecryptedAnswer);
 
-Fclose(fip);
-Fclose(fop);
-Fclose(fkp);
+ //encrypt - use key for encryption
+ encryptDecrypt(block, key, BLOCKSIZE, fDecryptedAnswer, fEncryptedAnswer);  
+ 
+//ftpUpload - use directory and output file as pathname 
+ char *outputFile = ofile;
+
+ Fclose(fDecryptedAnswer);
+ rc = ftpUpload(fEncryptedAnswer, userID, pw, serverName, dirName, outputFile);
+ 
+ if (rc) {                                                  /* bail if transfer was unsuccessful */
+    sprintf(str, "Unable to upload %s from %s (curl rc = %d (%s))", dirName, serverName, rc, curl_easy_strerror(rc));
+    bail(16, str);
+  }                                                   
+
+  
+ Fclose(fEncryptedFile);
+ Fclose(fDecryptedFile);
+ 
+ Fclose(fEncryptedAnswer);
+ Fclose(fkp);
 
 return 0;
 }

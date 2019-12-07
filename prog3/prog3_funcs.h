@@ -2,7 +2,7 @@
 #define PROG3_FUNCS
 
 void   parseArgs(int, char *[], char **, char **, char **, char **, char **, char **, char **);     /* in: argc, argv; out: ifile, ofile, kfile */
-int ftpDownload(char *, char *, char*, char *); 
+int ftpDownload(char *, char *, char*, char *, char *); 
 size_t ftpWrite(void *, size_t, size_t , void* );
 //static int     ftpDownload(char *, char *, char *, char *);
 //static size_t  ftpWrite(void *, size_t, size_t, void *);
@@ -16,4 +16,8 @@ void   Fclose(FILE *);                                          /* in: file ptr 
 void   bail(int, const char *);                                 /* in: rc to exit with, ptr to message to print */
 void   help();
 
+void extractValues(FILE *, long *, long *, char*);
+int solveEquation(long , long , char*);
+int ftpUpload(FILE *, char*, char* , char* , char *, char *);
+size_t ftpRead(void * , size_t , size_t , void *);
 #endif
