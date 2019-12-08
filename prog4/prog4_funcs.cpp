@@ -26,35 +26,38 @@
 //using namespace std;
 
 void parseargs(int argc, int* argv[]){
-  std::string input;
-  std::vector<std::string> v;
   
   switch(argc){
   
-  //only one argument
-  case 1: {
- 
-    while(std::getline(std::cin, input)){
-      v.push_back(input);  
-    }
-
-    std::vector<std::string>::iterator it;
-    for (it = v.begin(); it != v.end(); it++){
-      std::cout << *it << "\n";
-    }
-    
+    //only one argument
+  case 1: {    
     break;
   }
-    
   default: {
     help();
+    exit(0);
   }
 
   }
 }
 
 void parseFile(Count &count){
-  
+  std::string input;
+  std::vector<std::string> v;
+
+  while(std::getline(std::cin, input)){
+    //this will handle the CTRL - D case 
+    if (std::cin.eof()){
+      exit(0);
+    }
+    v.push_back(input);  
+  }
+
+  //std::vector<std::string>::iterator it;
+  for (std::string i : v){
+    std::cout << i << "\n";
+  }
+    
 }
 
 //const char* is a mutable pointer to an immutable character/string

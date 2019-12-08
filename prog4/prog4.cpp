@@ -20,11 +20,13 @@
 // add something to .gdb init to make it work
 
 int main(int argc, char *argv[]) {
+  
   parseArgs(argc, argv);
 
   Count count;
 
   parseFile(&count);
-
+  
   return 0;
+
 }
