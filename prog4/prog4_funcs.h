@@ -6,5 +6,5 @@
 void parseArgs(int, char *[]); //print help if any args are given
 void parseFile(Count *);
 void bail(int, const char *);
-
+void help();
 #endif
