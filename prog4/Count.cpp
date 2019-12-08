@@ -10,11 +10,10 @@
 
 #include <iostream>  // for C++ I/O
 #include <vector>    // for vector
-#include <Count.h>
 
 class Count{
   
-public:{
+public:
   Count(){
     // constructor: initialize category counts
     
@@ -40,7 +39,7 @@ public:{
   ~Count(){
     // destrucotr: print counts and total when done
   }
-}
+
 
 private:
   std::vector<unsigned int> numLetter[26];
