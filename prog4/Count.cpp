@@ -62,11 +62,7 @@ void Count::increment(char value, unsigned char index){
   
 unsigned int Count::getTotal(){
   // getter: return total of all counts
-  return std::ostream;
-}
-  
-std::ostream & operator <<(std::ostream & output, Count & count){
-  // <<operator: support printing of counts
+  int output = 0;
   accumulate(numLetter.begin(), numLetter.end(), output);
   accumulate(numDigit.begin(), numDigit.end(), output);
 
@@ -77,13 +73,18 @@ std::ostream & operator <<(std::ostream & output, Count & count){
   return output;
 }
   
+std::ostream & operator <<(std::ostream & output, Count & count){
+  // <<operator: support printing of counts
+
+  output << count.numWhiteSpace << "/n";
+  output << count.numOther << "/n";
+  output << count.numExtended << "/n";
+  output << count.numNewline << "/n";
+  return output;
+}
+  
 Count::~Count(){
   // destrucotr: print counts and total when done
-  std::cout << numWhiteSpace << "/n";
-  std::cout << numOther << "/n";
-  std::cout << numExtended << "/n";
-  std::cout << numNewline << "/n";
-
   std::cout << "Count object destroyed" << std::endl;
 }
   
