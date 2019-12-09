@@ -16,10 +16,10 @@ Count::Count(){
   // constructor: initialize category counts
 
   //set vectors to 0
-  numLetter(26, 0);
-  numDigit(10, 0);
-  //std::fill(numLetter.begin(), numLetter.end(), 0);
-  //std::fill(numDigit.begin(), numDigit.end(), 0);
+  //numLetter(26, 0);
+  //numDigit(10, 0);
+  std::fill(numLetter.begin(), numLetter.end(), 0);
+  std::fill(numDigit.begin(), numDigit.end(), 0);
     
   //set variables to 0
   numWhiteSpace = 0;
