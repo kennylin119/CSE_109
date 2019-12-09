@@ -73,9 +73,9 @@ unsigned int Count::getTotal(){
   return sum;
 }
   
- std::ostream & operator <<(std::ostream &, Count &){
-  // <<operator: support printing of counts
-    
+ std::ostream & operator <<(std::ostream & output, Count & count){
+   // <<operator: support printing of counts
+   
 }
   
 Count::~Count(){

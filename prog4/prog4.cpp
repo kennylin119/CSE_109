@@ -2,10 +2,7 @@
 #include "prog4_funcs.h"
 
 // No "using namespace std" (use scoping operator ::)
-
 // No printf or fprintf statements
-// use extraction operators instead
-
 // No if-else statements, only switch statements
 // Must use vector 
 // Must use vector iterator
@@ -16,17 +13,12 @@
 // Must use 'this' pointer in destructor
 // Only use std::endl at end of function (use '\n' elsewhere)
 
-// add something to .gdb init to make it work
-
 int main(int argc, char *argv[]) {
-  
   parseArgs(argc, argv);
 
   Count count;
 
   parseFile(&count);
-  
+
   return 0;
-
 }
-

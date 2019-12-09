@@ -52,10 +52,11 @@ void parseFile(Count &count){
     }
     v.push_back(input);  
   }
+  
+  std::vector<std::string>::iterator it;
 
-  //std::vector<std::string>::iterator it;
-  for (std::string i : v){
-    std::cout << i << "\n";
+  for (it = v.begin(); it != v.end(); it++){
+    std::cout << *it << '\n';
   }
     
 }
