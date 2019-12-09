@@ -18,6 +18,8 @@ Count::Count(){
   //set vectors to 0
   numLetter.resize(26);
   numDigit.resize(10);
+  //numLetter(26, 0);
+  //numDigit(10, 0);
   std::fill(numLetter.begin(), numLetter.end(), 0);
   std::fill(numDigit.begin(), numDigit.end(), 0);
     
@@ -68,13 +70,14 @@ unsigned int Count::getTotal(){
 
   int output = 0;
   output = accumulate(numLetter.begin(), numLetter.end(), output);
-  output = accumulate(numDigit.begin(), numDigit.end(), output);
+  output = logaccumulate(numDigit.begin(), numDigit.end(), output);
 
   output += numWhiteSpace;
   output += numOther;
   output += numExtended;
   output += numNewline;
   
+  //std::cout << "hello" << "\n";
   return output;
 }
   
@@ -99,7 +102,8 @@ std::ostream& operator <<(std::ostream& output, Count& count){
   
 Count::~Count(){
   // destrucotr: print counts and total when done
-
+  //int total = getTotal();
+  //std::cout << "Total number of characters " << total << "\n";
   std::cout << *this << "\n";
   std::cout << "Count object destroyed" << std::endl;
 }
