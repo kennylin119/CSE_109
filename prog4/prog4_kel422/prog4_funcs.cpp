@@ -16,17 +16,14 @@
 
 //use vector, string, accumulate libraries
 
-void help(){
-  std::cout << "This program counts the occurrences of each type of byte streaming from STDIN."
-    "Specifically, it will count occurrences of each letter (regardless of case),"
-    "each digit, each whitespace, all other printable characters (except extended-ASCII),"
-    "all extended-ASCII characters, and all newline characters."
-    "\n"
-    "Usage: prog4 < someFile"
-    "     or"
-    "   prog4                  (Note: type input followed by Cntl+D)"
-	    << std::endl;
-}
+//using typedef instead of using namespace std
+//typedef std::cout cout_std;
+//typedef std::cin cin_std;
+//typedef std::cerr cerr_std;
+//typedef std::endl endl_std;
+
+
+//using namespace std;
 
 void parseArgs(int argc, char* argv[]){
   
@@ -94,11 +91,22 @@ void parseFile(Count * count){
     
   }
 }
-//const char* is a mutable pointer to an immutable character/string
-//thus the contents of msg cannot be changed
-void bail(int returnCode, const char *msg){
-  std::cerr << "(" << returnCode << ")" << msg << "\n";
-  exit(returnCode);
-}
+  //const char* is a mutable pointer to an immutable character/string
+  //thus the contents of msg cannot be changed
+  void bail(int returnCode, const char *msg){
+    std::cerr << "(" << returnCode << ")" << msg << "\n";
+    exit(returnCode);
+  }
 
-
+  //help not in .h file might have to move this up
+  void help(){
+    std::cout << "This program counts the occurrences of each type of byte streaming from STDIN."
+      "Specifically, it will count occurrences of each letter (regardless of case),"
+      "each digit, each whitespace, all other printable characters (except extended-ASCII),"
+      "all extended-ASCII characters, and all newline characters."
+      "\n"
+      "Usage: prog4 < someFile"
+      "     or"
+      "   prog4                  (Note: type input followed by Cntl+D)"
+	      << std::endl;
+  }
