@@ -13,8 +13,8 @@ public:
   friend std::ostream & operator <<(std::ostream &, Count &);   // <<operator: support printing of counts
   ~Count();                                                     // destrucotr: print counts and total when done
 private:
-  std::vector<unsigned int> numLetter{26};
-  std::vector<unsigned int> numDigit{10};
+  std::vector<unsigned int> numLetter[26];
+  std::vector<unsigned int> numDigit[10];
   unsigned int numWhiteSpace = 0;
   unsigned int numOther = 0;
   unsigned int numExtended = 0;

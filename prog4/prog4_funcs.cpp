@@ -29,7 +29,7 @@ void parseargs(int argc, int* argv[]){
   
   switch(argc){
   
-    //only one argument
+  //only one argument
   case 1: {    
     break;
   }
