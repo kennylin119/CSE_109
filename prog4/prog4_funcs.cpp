@@ -87,11 +87,7 @@ void parseFile(Count * count){
       default: 
 	count->increment('o');
       }
-    }/*
-       for (int i = 0; i < v.size(); i++){
-       std::cout << v[i] << '\n';
-       }*/
-    
+    }
   }
 }
 //const char* is a mutable pointer to an immutable character/string
