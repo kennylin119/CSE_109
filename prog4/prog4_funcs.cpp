@@ -8,11 +8,11 @@
  */
 
 
+#include "prog4_funcs.h"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <numeric>
-#include "prog4_funcs.h"
 
 //use vector, string, accumulate libraries
 
@@ -25,7 +25,7 @@
 
 //using namespace std;
 
-void parseargs(int argc, int* argv[]){
+void parseArgs(int argc, char* argv[]){
   
   switch(argc){
   
@@ -41,24 +41,33 @@ void parseargs(int argc, int* argv[]){
   }
 }
 
-void parseFile(Count &count){
+void parseFile(Count * count){
+  
   std::string input;
   std::vector<std::string> v;
-
-  while(std::getline(std::cin, input)){
+  
+  //this is getting user input
+  while(getline(std::cin, input)){
     //this will handle the CTRL - D case 
     if (std::cin.eof()){
       exit(0);
     }
-    v.push_back(input);  
+    v.push_back(input); 
   }
   
+  //this is iterating through the user input
   std::vector<std::string>::iterator it;
-
   for (it = v.begin(); it != v.end(); it++){
-    std::cout << *it << '\n';
+    //std::cout << *it << '\n';
+    for (unsigned int i = 0; i < (*it).size(); i++){
+      
+      switch((*it)[i]){
+      case 'a' ... 'z':
+	count->increment(it, ( *it - 'a' + 1) );
+      }
   }
     
+  }
 }
 
 //const char* is a mutable pointer to an immutable character/string

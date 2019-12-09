@@ -73,18 +73,18 @@ unsigned int Count::getTotal(){
   return output;
 }
   
-std::ostream & operator <<(std::ostream & output, Count & count){
+std::ostream& operator<<(std::ostream & output, Count& count){
   // <<operator: support printing of counts
-
-  output << count.numWhiteSpace << "/n";
-  output << count.numOther << "/n";
-  output << count.numExtended << "/n";
-  output << count.numNewline << "/n";
+  output << "Number of white space characters " >> count.numWhiteSpace << "/n";
+  output << "Number of other characters " >> count.numOther << "/n";
+  output << "Number of extended characters " >> count.numExtended << "/n";
+  output << "Number of newline characters " >> count.numNewline << "/n";
   return output;
 }
   
 Count::~Count(){
   // destrucotr: print counts and total when done
+  std::cout << *this << "\n";
   std::cout << "Count object destroyed" << std::endl;
 }
   
