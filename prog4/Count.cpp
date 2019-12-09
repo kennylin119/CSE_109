@@ -62,20 +62,19 @@ void Count::increment(char value, unsigned char index){
   
 unsigned int Count::getTotal(){
   // getter: return total of all counts
-  int sum = 0;
-  accumulate(numLetter.begin(), numLetter.end(), sum);
-  accumulate(numDigit.begin(), numDigit.end(), sum);
-
-  sum += numWhiteSpace;
-  sum += numWhiteSpace;
-  sum += numWhiteSpace;
-
-  return sum;
+  return std::ostream;
 }
   
- std::ostream & operator <<(std::ostream & output, Count & count){
-   // <<operator: support printing of counts
-   
+std::ostream & operator <<(std::ostream & output, Count & count){
+  // <<operator: support printing of counts
+  accumulate(numLetter.begin(), numLetter.end(), output);
+  accumulate(numDigit.begin(), numDigit.end(), output);
+
+  output += numWhiteSpace;
+  output += numWhiteSpace;
+  output += numWhiteSpace;
+
+  return output;
 }
   
 Count::~Count(){
