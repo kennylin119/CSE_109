@@ -69,12 +69,13 @@ unsigned int Count::getTotal(){
   // getter: return total of all counts
 
   int output = 0;
-  accumulate(numLetter.begin(), numLetter.end(), output);
-  accumulate(numDigit.begin(), numDigit.end(), output);
+  output = accumulate(numLetter.begin(), numLetter.end(), output);
+  output = accumulate(numDigit.begin(), numDigit.end(), output);
 
   output += numWhiteSpace;
-  output += numWhiteSpace;
-  output += numWhiteSpace;
+  output += numOther;
+  output += numExtended;
+  output += numNewline;
   
   //std::cout << "hello" << "\n";
   return output;
@@ -91,11 +92,11 @@ std::ostream& operator <<(std::ostream& output, Count& count){
     std::cout <<  "Number of digit " << i  << ": "<< count.numDigit[i] << "\n";
   }
   
-  output << "Number of white space characters " << count.numWhiteSpace << "\n";
-  output << "Number of other characters " << count.numOther << "\n";
-  output << "Number of extended characters " << count.numExtended << "\n";
-  output << "Number of newline characters " << count.numNewline << "\n";
-  output << "Total number of characters " << count.getTotal() << "\n";
+  output << "Number of white space characters: " << count.numWhiteSpace << "\n";
+  output << "Number of other characters: " << count.numOther << "\n";
+  output << "Number of extended characters: " << count.numExtended << "\n";
+  output << "Number of newline characters: " << count.numNewline << "\n\n";
+  output << "Total number of characters: " << count.getTotal() << "\n";
   return output;
 }
   
