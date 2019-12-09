@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Count.h"
 #include "prog4_funcs.h"
 
